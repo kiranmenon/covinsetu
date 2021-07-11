@@ -3,12 +3,12 @@ from apiclient.headers import MyHeaders as myHeader
 from requests.exceptions import HTTPError
 import datetime
 from notifyInStdOut import NotifyInStdOut
-
+import globals
 
 class CalendarByPin:
     def __init__(self):
         self.url = myHeader.calendarByPinURL
-        self.pincodes = ["680662", "680686", "680664", "680671", "680688", "680666", "680681", "680691"]
+        self.pincodes = globals.app.ConfigData["calendarByPin"]["pinCodes"]
         super().__init__()
     
     def exec(self):
