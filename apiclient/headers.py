@@ -1,8 +1,9 @@
+import globals
 
 class Headers:
     def __init__(self):
         self.headers = {
-            'Authorization': 'Bearer xxx',
+            'Authorization': 'Bearer ' + globals.app.ConfigData["apiToken"],
             'Accept': 'application/json',
             'Accept-Encoding': "gzip,deflate,br",
             'User-Agent': "com.qlabs.http.client"
