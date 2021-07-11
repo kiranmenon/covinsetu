@@ -1,5 +1,5 @@
 import requests
-from headers import MyHeaders as myHeader
+from apiclient.headers import MyHeaders as myHeader
 from requests.exceptions import HTTPError
 import datetime
 from notifyInStdOut import NotifyInStdOut
@@ -12,7 +12,7 @@ class CalendarByPin:
         super().__init__()
     
     def exec(self):
-        for pincode in pincodes:    
+        for pincode in self.pincodes:    
             params = {
                 "pincode" : pincode,
                 "date" : datetime.date.today().strftime("%d-%m-%y")
@@ -20,7 +20,7 @@ class CalendarByPin:
             # print("Using qParams: pincode {0}, date {1}".format(params["pincode"], params["date"]))
             
             try:
-                response = requests.request("GET", url, headers=myHeader.headers, params=params)
+                response = requests.request("GET", self.url, headers=myHeader.headers, params=params)
                 response.raise_for_status()
             except HTTPError as http_err:
                 print("HTTP error occured. {1}".format(http_err))
