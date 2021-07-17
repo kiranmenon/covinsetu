@@ -3,6 +3,7 @@ from apiclient.headers import MyHeaders as myHeader
 from requests.exceptions import HTTPError
 import datetime
 from notifyInStdOut import NotifyInStdOut
+from notifyByPushbullet import NotifyByPushbullet
 import globals
 
 class CalendarByPin:
@@ -23,15 +24,25 @@ class CalendarByPin:
                 response = requests.request("GET", self.url, headers=myHeader.headers, params=params)
                 response.raise_for_status()
             except HTTPError as http_err:
-                print("HTTP error occured. {1}".format(http_err))
+                print("HTTP error occured. {0}".format(http_err))
             except Exception as err:
-                print("Unknown error. {1}".format(err))
+                print("Unknown error. {0}".format(err))
             # else:
             #     print(response.text)
 
             replyJson = response.json()
             for center in replyJson["centers"]:
-                print(center["name"])
+                # print(center["name"])
                 for session in center["sessions"]:
-                    text = "session date: {0}, Available: {1}, Dose1: {2} ".format(session["date"], session["available_capacity"], session["available_capacity_dose1"])
-                    NotifyInStdOut.notify(text)
+                    text = "Center : {3}, session date: {0}, Available: {1}, Dose1: {2} ".format(session["date"], \
+                        session["available_capacity"], session["available_capacity_dose1"], center["name"])
+                    for channel in globals.app.ConfigData["notificationChannels"]:
+                        if channel["type"] == "pushbullet":  
+                            if channel["enable"] == "true":
+                                token = channel["options"]["token"]                                
+                                pushBulletApiClient = NotifyByPushbullet(token)
+                                pushBulletApiClient.notify("COWIN alert for calendar by pin " + pincode, text)      
+                        elif channel["type"] == "stdout":
+                            if channel["enable"] == "true":
+                                NotifyInStdOut.notify(text)
+                    
