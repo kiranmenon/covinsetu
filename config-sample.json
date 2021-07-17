@@ -1,8 +1,26 @@
 {
     "apiToken" : "xxxx",
     "notificationChannels": [
-        "mail",
-        "stdout"
+        {
+            "type": "mail",
+            "name": "log",
+            "enable": "true",
+            "options": {  }
+        },
+        {
+            "name": "log",
+            "type": "stdout",
+            "enable": "true",
+            "options": {  }
+        },
+        {
+            "name": "my-pushbullet-devices",
+            "type": "pushbullet",
+            "enable": "true",
+            "options": {
+            "token": "xxxxxx--api-token--xxxx"
+        }
+    }
     ],
     "logger" : {
         "level": {
