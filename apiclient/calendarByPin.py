@@ -4,6 +4,7 @@ from requests.exceptions import HTTPError
 import datetime
 from notifyInStdOut import NotifyInStdOut
 from notifyByPushbullet import NotifyByPushbullet
+from apiclient.parseResponses import ParseCenters
 import globals
 
 class CalendarByPin:
@@ -27,22 +28,22 @@ class CalendarByPin:
                 print("HTTP error occured. {0}".format(http_err))
             except Exception as err:
                 print("Unknown error. {0}".format(err))
-            # else:
+            else:
             #     print(response.text)
 
-            replyJson = response.json()
-            for center in replyJson["centers"]:
-                # print(center["name"])
-                for session in center["sessions"]:
-                    text = "Center : {3}, session date: {0}, Available: {1}, Dose1: {2} ".format(session["date"], \
-                        session["available_capacity"], session["available_capacity_dose1"], center["name"])
-                    for channel in globals.app.ConfigData["notificationChannels"]:
-                        if channel["type"] == "pushbullet":  
-                            if channel["enable"] == "true":
-                                token = channel["options"]["token"]                                
-                                pushBulletApiClient = NotifyByPushbullet(token)
+                replyJson = response.json()
+                textList = ParseCenters.parseCenters(replyJson)
+                   
+                for channel in globals.app.ConfigData["notificationChannels"]:
+                    if channel["type"] == "pushbullet":  
+                        if channel["enable"] == "true":
+                            token = channel["options"]["token"]                                
+                            pushBulletApiClient = NotifyByPushbullet(token)
+                            for text in textList:
                                 pushBulletApiClient.notify("COWIN alert for calendar by pin " + pincode, text)      
-                        elif channel["type"] == "stdout":
-                            if channel["enable"] == "true":
+                    elif channel["type"] == "stdout":
+                        if channel["enable"] == "true":
+                            for text in textList:
                                 NotifyInStdOut.notify(text)
+    
                     
