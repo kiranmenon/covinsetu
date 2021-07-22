@@ -13,6 +13,7 @@ class CalendarByCenter:
         self.centers = globals.app.ConfigData["calendarByCenter"]["centers"]
         super().__init__()
     def exec(self):
+        finalText = ""
         for center in self.centers:
             params = {
                 "center_id" : center,
@@ -27,20 +28,27 @@ class CalendarByCenter:
             except Exception as e:
                 print("Unknown error." + str(e))
             else:
-                print(response.text)
+                # print(response.text)
                 replyJson = response.json()
                 try:
-                    text = ParseCenters.parseCenter(replyJson["centers"])
+                    text = ParseCenters.parseCenter(replyJson["centers"])                    
                 except KeyError as e:
-                    print("Key not found." + str(e)) 
+                    # print("Key not found." + str(e)) 
+                    pass
                 else:
-                    for channel in globals.app.ConfigData["notificationChannels"]:
-                        if channel["type"] == "pushbullet":
-                            if channel["enable"] == "true":
-                                token = channel["options"]["token"]
-                                pbClient = notifyByPushbullet.NotifyByPushbullet(token)
-                                pbClient.notify("COWIN alert for calendar by center " + params["center_id"], text)
-                        elif channel["type"] == "stdout":
-                            if channel["enable"] == "true":
-                                NotifyInStdOut.notify(text)                
+                    if text is None:
+                        continue
+                    else:
+                        finalText += "\n" + text + "\n"
+        for channel in globals.app.ConfigData["notificationChannels"]:
+            if channel["type"] == "pushbullet":
+                if channel["enable"] == "true":
+                    token = channel["options"]["token"]
+                    pbClient = notifyByPushbullet.NotifyByPushbullet(token)
+                    if finalText != "" :
+                        pbClient.notify("COWIN alert calendar-by-center", finalText)
+            elif channel["type"] == "stdout":
+                if channel["enable"] == "true":
+                    if finalText != "" :
+                        NotifyInStdOut.notify("COWIN alert calendar-by-center" + finalText)                
 

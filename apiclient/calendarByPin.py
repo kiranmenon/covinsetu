@@ -14,6 +14,7 @@ class CalendarByPin:
         super().__init__()
     
     def exec(self):
+        finalText = ""
         for pincode in self.pincodes:    
             params = {
                 "pincode" : pincode,
@@ -33,17 +34,20 @@ class CalendarByPin:
 
                 replyJson = response.json()
                 textList = ParseCenters.parseCenters(replyJson)
+                for text in textList:
+                    if text is not None:
+                        finalText += "\n" + text + "\n"
                    
-                for channel in globals.app.ConfigData["notificationChannels"]:
-                    if channel["type"] == "pushbullet":  
-                        if channel["enable"] == "true":
-                            token = channel["options"]["token"]                                
-                            pushBulletApiClient = NotifyByPushbullet(token)
-                            for text in textList:
-                                pushBulletApiClient.notify("COWIN alert for calendar by pin " + pincode, text)      
-                    elif channel["type"] == "stdout":
-                        if channel["enable"] == "true":
-                            for text in textList:
-                                NotifyInStdOut.notify(text)
+        for channel in globals.app.ConfigData["notificationChannels"]:
+            if channel["type"] == "pushbullet":  
+                if channel["enable"] == "true":
+                    token = channel["options"]["token"]                                
+                    pushBulletApiClient = NotifyByPushbullet(token)    
+                    if finalText != "" :                                                         
+                        pushBulletApiClient.notify("COWIN alert calendar-by-pin", finalText)      
+            elif channel["type"] == "stdout":
+                if channel["enable"] == "true":
+                    if finalText != "" :
+                        NotifyInStdOut.notify("COWIN alert calendar-by-pin" + finalText)
     
                     

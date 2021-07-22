@@ -1,5 +1,6 @@
 {
     "apiToken" : "xxxx",
+    "NotifyEvenIfNone": "false",
     "notificationChannels": [
         {
             "type": "mail",
